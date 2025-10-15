@@ -1,0 +1,295 @@
+/* Ultra Container for Elementor - Main Styles */
+
+.ultra-container {
+    display: block;
+    position: relative;
+    transition-property: all;
+    transition-timing-function: ease-in-out;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.ultra-container-content {
+    position: relative;
+    z-index: 2;
+}
+
+/* Button Styles */
+.ultra-container.ultra-button {
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    border: none;
+    outline: none;
+}
+
+.ultra-container.ultra-button a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Hover Effects Base */
+.ultra-container.ultra-hover-enabled {
+    transition-property: all;
+    transition-timing-function: ease-in-out;
+}
+
+/* Lift Animation */
+.ultra-container.ultra-lift {
+    transition: transform var(--ultra-transition-duration, 0.3s) ease-in-out;
+}
+
+.ultra-container.ultra-lift:hover {
+    transform: translateY(var(--ultra-lift-distance, -10px));
+}
+
+/* Scale Animation */
+.ultra-container.ultra-scale {
+    transition: transform var(--ultra-transition-duration, 0.3s) ease-in-out;
+}
+
+.ultra-container.ultra-scale:hover {
+    transform: scale(var(--ultra-scale-amount, 1.05));
+}
+
+/* Rotate Animation */
+.ultra-container.ultra-rotate {
+    transition: transform var(--ultra-transition-duration, 0.3s) ease-in-out;
+}
+
+.ultra-container.ultra-rotate:hover {
+    transform: rotate(var(--ultra-rotate-amount, 5deg));
+}
+
+/* Slide Animations */
+.ultra-container.ultra-slide {
+    transition: transform var(--ultra-transition-duration, 0.3s) ease-in-out;
+}
+
+.ultra-container.ultra-slide-left:hover {
+    transform: translateX(var(--ultra-slide-distance, -10px));
+}
+
+.ultra-container.ultra-slide-right:hover {
+    transform: translateX(var(--ultra-slide-distance, 10px));
+}
+
+.ultra-container.ultra-slide-up:hover {
+    transform: translateY(var(--ultra-slide-distance, -10px));
+}
+
+.ultra-container.ultra-slide-down:hover {
+    transform: translateY(var(--ultra-slide-distance, 10px));
+}
+
+/* Combined Animations */
+.ultra-container.ultra-lift.ultra-scale:hover {
+    transform: translateY(var(--ultra-lift-distance, -10px)) scale(var(--ultra-scale-amount, 1.05));
+}
+
+.ultra-container.ultra-lift.ultra-rotate:hover {
+    transform: translateY(var(--ultra-lift-distance, -10px)) rotate(var(--ultra-rotate-amount, 5deg));
+}
+
+.ultra-container.ultra-scale.ultra-rotate:hover {
+    transform: scale(var(--ultra-scale-amount, 1.05)) rotate(var(--ultra-rotate-amount, 5deg));
+}
+
+/* Shadow Effects */
+.ultra-container.ultra-shadow-enabled {
+    transition: box-shadow var(--ultra-transition-duration, 0.3s) ease-in-out;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .ultra-container {
+        transition-duration: 0.2s; /* Faster animations on mobile */
+    }
+    
+    .ultra-container.ultra-lift:hover {
+        transform: translateY(calc(var(--ultra-lift-distance, -10px) * 0.7)); /* Reduced lift on mobile */
+    }
+    
+    .ultra-container.ultra-scale:hover {
+        transform: scale(calc(var(--ultra-scale-amount, 1.05) * 0.95)); /* Reduced scale on mobile */
+    }
+}
+
+@media (max-width: 480px) {
+    .ultra-container {
+        transition-duration: 0.15s; /* Even faster animations on small mobile */
+    }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .ultra-container,
+    .ultra-container * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .ultra-container:hover {
+        transform: none !important;
+    }
+}
+
+/* Focus States for Accessibility */
+.ultra-container.ultra-button:focus {
+    outline: 2px solid #007cba;
+    outline-offset: 2px;
+}
+
+.ultra-container.ultra-button:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* Print Styles */
+@media print {
+    .ultra-container {
+        transform: none !important;
+        transition: none !important;
+        box-shadow: none !important;
+    }
+    
+    .ultra-container:hover {
+        transform: none !important;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .ultra-container {
+        border: 2px solid;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .ultra-container {
+        /* Inherit colors from parent - no forced dark mode overrides */
+    }
+}
+
+/* Container Sizing */
+.ultra-container.ultra-full-width {
+    width: 100%;
+}
+
+.ultra-container.ultra-full-height {
+    height: 100%;
+}
+
+/* Flexbox Support */
+.ultra-container.ultra-flex {
+    display: flex;
+}
+
+.ultra-container.ultra-flex.ultra-flex-column {
+    flex-direction: column;
+}
+
+.ultra-container.ultra-flex.ultra-flex-center {
+    align-items: center;
+    justify-content: center;
+}
+
+/* Grid Support */
+.ultra-container.ultra-grid {
+    display: grid;
+}
+
+/* Overflow Handling */
+.ultra-container.ultra-overflow-hidden {
+    overflow: hidden;
+}
+
+.ultra-container.ultra-overflow-auto {
+    overflow: auto;
+}
+
+/* Z-index Management */
+.ultra-container.ultra-z-index-1 {
+    z-index: 1;
+}
+
+.ultra-container.ultra-z-index-10 {
+    z-index: 10;
+}
+
+.ultra-container.ultra-z-index-100 {
+    z-index: 100;
+}
+
+/* Performance Optimizations */
+.ultra-container {
+    will-change: transform, box-shadow, background-color, color;
+}
+
+.ultra-container:not(.ultra-hover-enabled) {
+    will-change: auto;
+}
+
+/* Smooth Scrolling Support */
+.ultra-container.ultra-smooth-scroll {
+    scroll-behavior: smooth;
+}
+
+/* Custom Properties for Dynamic Styling */
+:root {
+    --ultra-transition-duration: 0.3s;
+    --ultra-lift-distance: -10px;
+    --ultra-scale-amount: 1.05;
+    --ultra-rotate-amount: 5deg;
+    --ultra-slide-distance: 10px;
+}
+
+/* Elementor Editor Specific Styles */
+.elementor-editor .ultra-container:hover {
+    /* Prevent hover effects in editor */
+    transform: none !important;
+}
+
+.elementor-editor .ultra-container {
+    /* Ensure proper display in editor */
+    min-height: 50px;
+}
+
+/* Loading States */
+.ultra-container.ultra-loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.ultra-container.ultra-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #007cba;
+    border-radius: 50%;
+    animation: ultra-spin 1s linear infinite;
+    z-index: 999;
+}
+
+@keyframes ultra-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Error States */
+.ultra-container.ultra-error {
+    border: 2px solid #dc3232;
+    background-color: rgba(220, 50, 50, 0.1);
+}
+
+/* Success States */
+.ultra-container.ultra-success {
+    border: 2px solid #46b450;
+    background-color: rgba(70, 180, 80, 0.1);
+}
