@@ -245,6 +245,11 @@ Ultra_Container::instance();
 register_activation_hook(__FILE__, 'ultra_container_activate');
 
 function ultra_container_activate() {
+    // Ensure the helper function is available when activating outside the admin
+    if (!function_exists('is_plugin_active')) {
+        require_once ABSPATH . 'wp-admin/includes/plugin.php';
+    }
+
     // Check if Elementor is active
     if (!is_plugin_active('elementor/elementor.php')) {
         deactivate_plugins(plugin_basename(__FILE__));
