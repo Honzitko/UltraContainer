@@ -66,10 +66,6 @@ final class Ultra_Container {
     public function __construct() {
         add_action('plugins_loaded', [$this, 'on_plugins_loaded']);
         
-        // Include test file in development
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            require_once ULTRA_CONTAINER_PLUGIN_PATH . 'test-plugin.php';
-        }
     }
 
     /**
@@ -83,9 +79,23 @@ final class Ultra_Container {
      * On Plugins Loaded
      */
     public function on_plugins_loaded() {
-        if ($this->is_compatible()) {
-            add_action('elementor/init', [$this, 'init']);
+        if (!$this->is_compatible()) {
+            return;
         }
+
+        if (did_action('elementor/loaded')) {
+            $this->bootstrap_elementor();
+            return;
+        }
+
+        add_action('elementor/loaded', [$this, 'bootstrap_elementor']);
+    }
+
+    /**
+     * Attach Elementor specific hooks once the dependency has fully loaded.
+     */
+    public function bootstrap_elementor() {
+        add_action('elementor/init', [$this, 'init']);
     }
 
     /**
@@ -93,14 +103,16 @@ final class Ultra_Container {
      */
     public function is_compatible() {
         // Check if Elementor installed and activated
-        if (!did_action('elementor/loaded')) {
+        if (!ultra_container_has_elementor()) {
             add_action('admin_notices', [$this, 'admin_notice_missing_main_plugin']);
+            add_action('network_admin_notices', [$this, 'admin_notice_missing_main_plugin']);
             return false;
         }
 
         // Check for required Elementor version
-        if (!version_compare(ELEMENTOR_VERSION, self::MINIMUM_ELEMENTOR_VERSION, '>=')) {
+        if (!ultra_container_has_required_elementor_version()) {
             add_action('admin_notices', [$this, 'admin_notice_minimum_elementor_version']);
+            add_action('network_admin_notices', [$this, 'admin_notice_minimum_elementor_version']);
             return false;
         }
 
@@ -245,18 +257,46 @@ Ultra_Container::instance();
 register_activation_hook(__FILE__, 'ultra_container_activate');
 
 function ultra_container_activate() {
-    // Check if Elementor is active
-    if (!is_plugin_active('elementor/elementor.php')) {
-        deactivate_plugins(plugin_basename(__FILE__));
-        wp_die(
-            __('Ultra Container for Elementor requires Elementor to be installed and activated.', 'ultra-container'),
-            __('Plugin Activation Error', 'ultra-container'),
-            ['back_link' => true]
-        );
+    if (!ultra_container_has_elementor()) {
+        set_transient('ultra_container_missing_elementor', 'missing', HOUR_IN_SECONDS);
+        return;
     }
-    
+
+    if (!ultra_container_has_required_elementor_version()) {
+        set_transient('ultra_container_missing_elementor', 'version', HOUR_IN_SECONDS);
+    }
+
     // Flush rewrite rules
     flush_rewrite_rules();
+}
+
+add_action('admin_init', 'ultra_container_maybe_display_activation_notice');
+
+function ultra_container_maybe_display_activation_notice() {
+    if (!current_user_can('activate_plugins')) {
+        delete_transient('ultra_container_missing_elementor');
+        return;
+    }
+
+    $status = get_transient('ultra_container_missing_elementor');
+
+    if (!$status) {
+        return;
+    }
+
+    $callback = function() use ($status) {
+        if ($status === 'version') {
+            echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__('Ultra Container for Elementor requires Elementor version 3.0.0 or newer. Please update Elementor to continue.', 'ultra-container') . '</p></div>';
+            return;
+        }
+
+        echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__('Ultra Container for Elementor requires Elementor to be installed and activated before it can run.', 'ultra-container') . '</p></div>';
+    };
+
+    add_action('admin_notices', $callback);
+    add_action('network_admin_notices', $callback);
+
+    delete_transient('ultra_container_missing_elementor');
 }
 
 /**
@@ -267,4 +307,40 @@ register_deactivation_hook(__FILE__, 'ultra_container_deactivate');
 function ultra_container_deactivate() {
     // Flush rewrite rules
     flush_rewrite_rules();
+}
+
+function ultra_container_has_elementor() {
+    if (did_action('elementor/loaded') || class_exists('\\Elementor\\Plugin')) {
+        return true;
+    }
+
+    include_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+    return function_exists('is_plugin_active') && is_plugin_active('elementor/elementor.php');
+}
+
+function ultra_container_has_required_elementor_version() {
+    if (defined('ELEMENTOR_VERSION') && version_compare(ELEMENTOR_VERSION, Ultra_Container::MINIMUM_ELEMENTOR_VERSION, '>=')) {
+        return true;
+    }
+
+    include_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+    if (!function_exists('get_plugin_data')) {
+        return false;
+    }
+
+    $elementor_plugin_file = WP_PLUGIN_DIR . '/elementor/elementor.php';
+
+    if (!is_readable($elementor_plugin_file)) {
+        return false;
+    }
+
+    $plugin_data = get_plugin_data($elementor_plugin_file, false, false);
+
+    if (empty($plugin_data['Version'])) {
+        return false;
+    }
+
+    return version_compare($plugin_data['Version'], Ultra_Container::MINIMUM_ELEMENTOR_VERSION, '>=');
 }
