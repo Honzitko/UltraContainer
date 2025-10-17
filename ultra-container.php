@@ -136,8 +136,15 @@ final class Ultra_Container {
         // Include Widget files
         require_once ULTRA_CONTAINER_PLUGIN_PATH . 'widgets/ultra-container-widget.php';
 
-        // Register widget - Updated for latest Elementor API
-        $widgets_manager->register(new \Elementor\Ultra_Container_Widget());
+        // Instantiate widget once to reuse across API versions
+        $widget = new \Elementor\Ultra_Container_Widget();
+
+        // Register widget with backwards compatibility for older Elementor versions
+        if (method_exists($widgets_manager, 'register')) {
+            $widgets_manager->register($widget);
+        } else {
+            $widgets_manager->register_widget_type($widget);
+        }
     }
 
     /**
